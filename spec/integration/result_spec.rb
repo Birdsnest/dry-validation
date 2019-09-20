@@ -40,6 +40,35 @@ RSpec.describe Dry::Validation::Result do
     end
   end
 
+  describe '#error?' do
+
+    let(:params) do
+      double(:params, message_set: [], to_h: { email: 'jane@doe.org', blank: '' })
+    end
+
+    let(:result) do
+      Dry::Validation::Result.new(params) do |r|
+        r.add_error(Dry::Validation::Message.new('email error', path: [:email]))
+      end
+    end
+
+    it 'returns true for an error from the schema' do
+      allow(params).to receive(:error?).
+        with(:blank).
+        and_return(true)
+
+      expect(result.error?(:blank)).to be true
+    end
+
+    it 'returns true for an error added by the validation' do
+      allow(params).to receive(:error?).
+        with(:email).
+        and_return(false)
+
+      expect(result.error?(:email)).to be true
+    end
+  end
+
   describe '#inspect' do
     let(:params) do
       double(:params, message_set: [], to_h: {})
